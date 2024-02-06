@@ -9,34 +9,39 @@ const App = () => {
   const [startStop, setStartStop] = useState(false)
   const [minutes, setMinutes] = useState(0)
   const [seconds, setSeconds] = useState(0)
-  const [currentSession, setCurrentSession] = useState(true)  
+  
+  const [word, setWord] = useState("Session")
   const sound = document.querySelector("#beep")
   
   const handleTime = () => {
-    
-    if(currentSession){
+    if(word === "Session"){
       setMinutes(sessionLength)
-      document.getElementById("timer-label").innerText = "Session";
-    }else if(!currentSession ){
+      setSeconds(0);
+    }else if(word === "Break"){
       setMinutes(breakLength)
-      document.getElementById("timer-label").innerText = "Break";
-      
+      setSeconds(0);
     }  
   }
 
   useEffect(() => {
     if(startStop){
       if (minutes < 0 ){
-        setCurrentSession((prevSession) => !prevSession)
+        if(word === "Session"){
+          setWord("Break")
+        }else if(word === "Break"){
+          setWord("Session")
+        }
         setMinutes(0)
       }
+      
         if(seconds <= 0){
           setTimeout(() => {
             setSeconds(60)
+            
           }, 1000)
         }
-
-        if (seconds === 0){
+      
+        if (seconds === 0 || seconds === 60 ){
           setTimeout(() => {
             setMinutes(m => m - 1)
           }, 1000)
@@ -48,6 +53,7 @@ const App = () => {
 
         const intervalId = setInterval(() => {
           setSeconds(prevSeconds => prevSeconds - 1);
+          
           }, 1000);
         return () => clearInterval(intervalId);
     }
@@ -55,7 +61,7 @@ const App = () => {
 
   useEffect(() => {
     handleTime()
-  }, [sessionLength, currentSession, breakLength])
+  }, [sessionLength, breakLength, word])
 
   const handleStartStop = () => {
 
@@ -93,7 +99,7 @@ const App = () => {
     setBreakLength(5)
     setMinutes(25)
     setSeconds(0)
-    setCurrentSession(true)
+    setWord("Session")
     setStartStop(false)
     sound.pause()
     sound.currentTime = 0
@@ -138,7 +144,7 @@ const App = () => {
           </div>
         </div>
         <div className="text-center border-4 space-y-4 border-blue-950 rounded-3xl p-4 w-full mx-auto">
-        <h1 id="timer-label" className={` text-2xl ${minutes < 1 ? "text-red-600" : "text-white"}`}></h1>
+          <h1 id="timer-label" className={` text-2xl ${minutes < 1 ? "text-red-600" : "text-white"}`}>{word}</h1>
           <p id="time-left" className={` text-8xl ${minutes < 1 ? "text-red-600" : "text-white"}`}>{minutes < 10 ? `0${minutes}` : minutes}:{seconds < 10 ? `0${seconds}` : seconds}</p>
           <div className=" space-x-4">
             <button id="start_stop" onClick={() => handleStartStop()}>
